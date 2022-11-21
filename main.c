@@ -6,53 +6,80 @@
 #include <allegro5/allegro_acodec.h>
 #include <pthread.h>
 
+pthread_t initTimer;
 GtkWidget *mainWindow, *initWindow, *box, *initLayout;
+ALLEGRO_SAMPLE_INSTANCE *sampleInstance;
+ALLEGRO_SAMPLE *sample;
+int togglePlay = 0;
+int endApp = 1;
+int flagPlay = 0;
 
 int initSound(){
-
-    if (!al_init()){
-        fprintf(stderr, "failed to initialize allegro!\n");
-        return -1;
-    }
-
-    if (!al_install_audio()){
-        fprintf(stderr, "failed to initialize audio!\n");
-        return -1;
-    }
-
-    if (!al_init_acodec_addon()){
-        fprintf(stderr, "failed to initialize audio codecs!\n");
-        return -1;
-    }
-
-    if (!al_reserve_samples(10)){
-        fprintf(stderr, "failed to reserve samples!\n");
-        return -1;
-    }
-
-    al_init_acodec_addon();
-
-    ALLEGRO_SAMPLE_INSTANCE *sampleInstance;
-    ALLEGRO_SAMPLE *sample = al_load_sample("./sound/sound.wav"); //sample always NULL
-    sampleInstance = al_create_sample_instance(sample);
-    al_set_sample_instance_playmode(sampleInstance, ALLEGRO_PLAYMODE_BIDIR);
-    al_attach_sample_instance_to_mixer(sampleInstance, al_get_default_mixer());
-
-    if (!sample){
-        printf("Audio clip sample not loaded!\n");
-        return -1;
-    }
-
-    // Play song
-    // al_play_sample_instance(sampleInstance);
-
-    al_rest(10.0);
 
     return 0;
 }
 // Function for thread
 void *timer (void *data) {
+    // Funtion for scope global
+
+    if (!al_init()){
+        fprintf(stderr, "failed to initialize allegro!\n");
+        return NULL;
+    }
+
+    if (!al_install_audio()){
+        fprintf(stderr, "failed to initialize audio!\n");
+        return NULL;
+    }
+
+    if (!al_init_acodec_addon()){
+        fprintf(stderr, "failed to initialize audio codecs!\n");
+        return NULL;
+
+    }
+
+    if (!al_reserve_samples(10)){
+        fprintf(stderr, "failed to reserve samples!\n");
+        return NULL;
+    }
+    al_init_acodec_addon();
+
+    while (endApp == 1){
+        if (flagPlay == 1) {
+            // Load song with name = data
+            sample = al_load_sample("./sound/Afraid.wav"); 
+            sampleInstance = al_create_sample_instance(sample);
+            al_set_sample_instance_playmode(sampleInstance, ALLEGRO_PLAYMODE_LOOP);
+            al_attach_sample_instance_to_mixer(sampleInstance, al_get_default_mixer());
+
+            if (!sample){
+                printf("Audio clip sample not loaded!\n");
+                return NULL;
+            }
+
+            
+                al_play_sample_instance(sampleInstance);
+            
+            al_rest(10.0);
+        }
+        
+    }
+    
+
+    puts("init thread");
     initSound();
+}
+
+static void playSong(GtkWidget *widget, gpointer user_data ) {
+    
+    if (flagPlay == 0) {
+        flagPlay = 1;
+        puts("play song");
+    } else {
+        flagPlay = 0;
+        puts("stop song");
+        al_stop_sample_instance(sampleInstance);
+    }
 }
 
 /**
@@ -63,8 +90,6 @@ void *timer (void *data) {
  */
 static void activate (GtkApplication *app, gpointer user_data) {
     // Create and start threead for timer
-    pthread_t initTimer;
-    pthread_create(&initTimer, NULL, &timer, NULL);
 
     GtkWidget *controlsSection, *musicSection, *background, *fixed;
     GtkWidget *timeMusic;
@@ -74,7 +99,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
     fixed = gtk_fixed_new();
     // background = gtk_layout_new(NULL, NULL);
     controlsSection = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    musicSection = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    musicSection = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_box_set_homogeneous(GTK_BOX(musicSection), FALSE);
     gtk_box_set_homogeneous(GTK_BOX(background), FALSE);
     cssProvider = gtk_css_provider_new();
@@ -133,16 +158,18 @@ static void activate (GtkApplication *app, gpointer user_data) {
 
     // COMPONENTS FOR MUSICS SECTION
     GtkWidget *title, *nameSongOne;
-    GtkWidget *boxForSongs;
+    GtkWidget *buttonSong[10], *buttBoxSong[10];
 
-    boxForSongs = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    gtk_widget_set_name(GTK_WIDGET(boxForSongs), "song");
-    nameSongOne = gtk_label_new("Rolon de prueba en formato .wav");
-    gtk_box_pack_start(GTK_BOX(boxForSongs), nameSongOne, TRUE, TRUE, 5);
-    title = gtk_label_new("Name");
-    gtk_style_context_add_class(gtk_widget_get_style_context(title), "title");
-    gtk_container_add(GTK_CONTAINER(musicSection), title);
-    gtk_container_add(GTK_CONTAINER(musicSection), boxForSongs);
+    for (int i = 0; i < 10; i++) {
+        buttonSong[i] = gtk_button_new_with_label("Rolon de prueba en formato .wav");
+        buttBoxSong[i] = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+        gtk_container_add(GTK_CONTAINER(buttBoxSong[i]), buttonSong[i]);
+        gtk_widget_set_size_request(GTK_WIDGET(buttonSong[i]), 1070, 50);
+        g_signal_connect(buttonSong[i], "clicked", G_CALLBACK(playSong), NULL);
+        gtk_style_context_add_class(gtk_widget_get_style_context(buttonSong[i]), "songs");
+
+        gtk_container_add(GTK_CONTAINER(musicSection), buttBoxSong[i]);
+    }
 
     // Load CSS file
     gtk_css_provider_load_from_path(cssProvider, "./style.css", NULL);
@@ -158,6 +185,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
 int main (int argc, char **argv) {
     GtkApplication *app;
     int status;
+    pthread_create(&initTimer, NULL, &timer, NULL);
     app = gtk_application_new ("org.gtk.music", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
     status = g_application_run (G_APPLICATION (app), argc, argv);
@@ -165,9 +193,5 @@ int main (int argc, char **argv) {
 
     return status;
 }
-
-// Compiler gcc `pkg-config --cflags gtk+-3.0` -o main main.c `pkg-config --libs gtk+-3.0` 
-
-// Compiler: gcc `pkg-config --cflags gtk+-3.0` main.c -I/home/monstruosoft/libs/usr/local/include/ -L/home/monstruosoft/libs/usr/local/lib/* -o main `pkg-config --libs gtk+-3.0`
 
 // gcc `pkg-config --cflags gtk+-3.0` main.c -I/home/monstruosoft/libs/usr/local/include/ -L/home/monstruosoft/libs/usr/local/lib/ -lallegro -lallegro_primitives -lallegro_audio -lallegro_acodec -o main `pkg-config --libs gtk+-3.0` 

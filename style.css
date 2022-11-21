@@ -28,6 +28,13 @@
   margin: 150px;
   border-bottom-color: whitesmoke;
 }
+.songs{
+  background: rgb(1, 49, 69);
+  transition: all 1s;
+}
+.songs:hover {
+  background: rgb(1, 66, 92);
+}
 /* 
 .title {
   color: red;
