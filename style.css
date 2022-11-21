@@ -1,5 +1,5 @@
 #box {
-    background: linear-gradient(90deg, rgb(0, 37, 52), rgb(15, 15, 80), rgb(0, 37, 52));
+    background: linear-gradient(90deg, rgb(0, 45, 63), rgb(0, 0, 0), rgb(0, 54, 76));
     /* background-color: rgb(13, 13, 13);
     border: solid 1px rgb(170, 170, 170);
     box-shadow:
@@ -17,9 +17,10 @@
 }
 #controls-section {
   /* background: transparent; */
-  border-top-color: aqua;
-  box-shadow: 1px -5px 24px 3px rgb(0, 51, 57);
-  /* box-shadow: inset 1px -5px 24px 3px rgb(0, 51, 57); */
+  border-top-color: rgb(0, 255, 255);
+  /* box-shadow: 1px -5px 24px 3px rgb(0, 64, 44); */
+  background: radial-gradient(rgb(47, 0, 78) 25%, rgb(111, 250, 255) 50%,rgb(47, 0, 78) 80%);
+  box-shadow: inset 15px -5px 30px 35px rgb(0, 0, 0);
   min-width: 1080px;
 }
 
@@ -29,8 +30,11 @@
   border-bottom-color: whitesmoke;
 }
 .songs{
-  background: rgb(1, 49, 69);
+  /* background: rgb(1, 49, 69); */
+  background: transparent;
   transition: all 1s;
+  border-bottom-color: rgb(72, 3, 136);
+  border-top-color: rgb(72, 3, 136);
 }
 .songs:hover {
   background: rgb(1, 66, 92);

@@ -20,6 +20,7 @@ int initSound(){
 }
 // Function for thread
 void *timer (void *data) {
+    printf("%d\n", system("ls sound"));
     // Funtion for scope global
 
     if (!al_init()){
@@ -91,15 +92,17 @@ static void playSong(GtkWidget *widget, gpointer user_data ) {
 static void activate (GtkApplication *app, gpointer user_data) {
     // Create and start threead for timer
 
-    GtkWidget *controlsSection, *musicSection, *background, *fixed;
+    GtkWidget *controlsSection, *musicSection, *background, *fixed, *scroll;
     GtkWidget *timeMusic;
     GtkCssProvider *cssProvider;
 
     background = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     fixed = gtk_fixed_new();
+    scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_widget_set_size_request(GTK_WIDGET(scroll), 1080, 500);
     // background = gtk_layout_new(NULL, NULL);
     controlsSection = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    musicSection = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    musicSection = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_set_homogeneous(GTK_BOX(musicSection), FALSE);
     gtk_box_set_homogeneous(GTK_BOX(background), FALSE);
     cssProvider = gtk_css_provider_new();
@@ -111,7 +114,8 @@ static void activate (GtkApplication *app, gpointer user_data) {
 
     // Add main sections at window
     gtk_box_set_center_widget(GTK_BOX(background), fixed);
-    gtk_fixed_put(GTK_FIXED(fixed), musicSection, 0, 0);
+    gtk_fixed_put(GTK_FIXED(fixed), scroll, 0, 0);
+    gtk_container_add(GTK_CONTAINER(scroll), musicSection);
     gtk_fixed_put(GTK_FIXED(fixed), controlsSection, 0, 500);
 
     // Set properties for winow
@@ -158,9 +162,9 @@ static void activate (GtkApplication *app, gpointer user_data) {
 
     // COMPONENTS FOR MUSICS SECTION
     GtkWidget *title, *nameSongOne;
-    GtkWidget *buttonSong[10], *buttBoxSong[10];
+    GtkWidget *buttonSong[20], *buttBoxSong[20];
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 20; i++) {
         buttonSong[i] = gtk_button_new_with_label("Rolon de prueba en formato .wav");
         buttBoxSong[i] = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
         gtk_container_add(GTK_CONTAINER(buttBoxSong[i]), buttonSong[i]);
@@ -183,6 +187,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
 
 // funtion main
 int main (int argc, char **argv) {
+    system("clear");
     GtkApplication *app;
     int status;
     pthread_create(&initTimer, NULL, &timer, NULL);
