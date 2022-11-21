@@ -1,20 +1,38 @@
 #box {
-    /* background: linear-gradient(90deg, rgb(2, 2, 131), rgb(7, 66, 41) 40%); */
-    background-color: rgb(13, 13, 13);
+    background: linear-gradient(90deg, rgb(0, 37, 52), rgb(15, 15, 80), rgb(0, 37, 52));
+    /* background-color: rgb(13, 13, 13);
     border: solid 1px rgb(170, 170, 170);
     box-shadow:
     inset 60px 0 120px rgb(105, 0, 105),
     inset -60px 0 120px rgb(0, 108, 108),
-    inset -60px 0 120px rgb(15, 15, 15);
+    inset -60px 0 120px rgb(15, 15, 15); */
 
 
-}   
+}    
 #music-section {
-  background: whitesmoke;
+  /* background: transparent; */
+  box-shadow: 1px -5px 14px 3px rgb(0, 0, 0);
   border-color: red;
+  min-width: 1080px;
 }
 #controls-section {
-  background: whitesmoke;
+  /* background: transparent; */
+  border-top-color: aqua;
+  box-shadow: 1px -5px 24px 3px rgb(0, 51, 57);
+  /* box-shadow: inset 1px -5px 24px 3px rgb(0, 51, 57); */
+  min-width: 1080px;
+}
+
+.song {
+  padding-bottom: 5px;
+  margin: 150px;
+  border-bottom-color: whitesmoke;
+}
+/* 
+.title {
+  color: red;
+  font-size: 22px;
+  background: transparent;
 }
 .button {
     box-shadow:
@@ -28,4 +46,5 @@
       10px 0 20px #0ff;
     border-radius: 50%;
     background: #000;
-}
+} 
+*/
