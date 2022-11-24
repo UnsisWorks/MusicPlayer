@@ -12,6 +12,7 @@ GtkWidget *mainWindow, *initWindow, *box, *initLayout;
 ALLEGRO_SAMPLE_INSTANCE *sampleInstance;
 ALLEGRO_SAMPLE *sample;
 char nameSound[N][30];
+char nameSoundPlayed[30] = "-999";
 int totalSounds = 0;;
 int playedSound = 0;
 int soundSelected;
@@ -79,7 +80,8 @@ void *timer (void *data) {
     while (endApp == 1){
         if (flagPlay == 1) {
             // Load song with name = data
-            sample = al_load_sample("./sound/Afraid.wav"); 
+            printf("slected: %s\n", nameSoundPlayed);
+            sample = al_load_sample(nameSoundPlayed); 
             sampleInstance = al_create_sample_instance(sample);
             al_set_sample_instance_playmode(sampleInstance, ALLEGRO_PLAYMODE_LOOP);
             al_attach_sample_instance_to_mixer(sampleInstance, al_get_default_mixer());
@@ -104,7 +106,12 @@ void *timer (void *data) {
 }
 
 static void playSong(GtkWidget *widget, gpointer user_data ) {
-    
+    if (strcmp(nameSoundPlayed, gtk_button_get_label(GTK_BUTTON(widget))) == 0) {
+        puts("mismo boton");
+    }
+    strcpy(nameSoundPlayed, "./sound/");
+    strcat(nameSoundPlayed, gtk_button_get_label(GTK_BUTTON(widget)));
+
     if (flagPlay == 0) {
         flagPlay = 1;
     } else {
@@ -198,8 +205,8 @@ static void activate (GtkApplication *app, gpointer user_data) {
     GtkWidget *buttonSong[20], *buttBoxSong[20];
 
     // Create and shows musics
-    for (int i = 0; i < 12; i++) {
-        buttonSong[i] = gtk_button_new_with_label("Rolon de prueba en formato .wav");
+    for (int i = 0; i < totalSounds; i++) {
+        buttonSong[i] = gtk_button_new_with_label(nameSound[i]);
         buttBoxSong[i] = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
         gtk_container_add(GTK_CONTAINER(buttBoxSong[i]), buttonSong[i]);
         gtk_widget_set_size_request(GTK_WIDGET(buttonSong[i]), 1070, 50);
