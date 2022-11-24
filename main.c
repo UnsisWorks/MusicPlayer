@@ -6,13 +6,47 @@
 #include <allegro5/allegro_acodec.h>
 #include <pthread.h>
 
+#define N 50
 pthread_t initTimer;
 GtkWidget *mainWindow, *initWindow, *box, *initLayout;
 ALLEGRO_SAMPLE_INSTANCE *sampleInstance;
 ALLEGRO_SAMPLE *sample;
-int togglePlay = 0;
+char nameSound[N][30];
+int totalSounds = 0;;
+int playedSound = 0;
+int soundSelected;
 int endApp = 1;
 int flagPlay = 0;
+
+int searchSounds() {
+    system("python3 search.py");
+
+    FILE *data = fopen("./data.txt", "r");
+
+    if (data == NULL) {
+        puts("Arc data no encontrado");
+        exit(-1);
+    }
+
+    int i = 0;
+    while (feof(data) == 0) {
+        fscanf(data, "%s", nameSound[i]);
+        i++;
+    }
+
+    // Count number total the sounds
+    for (i = 0; i < N; i++) {
+        if(strcmp(nameSound[i], "") != 0) {
+            printf("datos en memoria: %s\n", nameSound[i]);
+            totalSounds++;
+        } else {
+            printf("total de canciones: %d\n", totalSounds);
+            break;
+        }
+    }
+
+    fclose(data);
+}
 
 int initSound(){
 
@@ -54,9 +88,15 @@ void *timer (void *data) {
                 printf("Audio clip sample not loaded!\n");
                 return NULL;
             }
-            al_play_sample_instance(sampleInstance);
+            if (playedSound == 0) {
+                al_play_sample_instance(sampleInstance);
+                playedSound = 1;
+                printf("play song. playedSound = %d\n ", playedSound);
+            }
+
             
             al_rest(10.0);
+            // flagPlay = 0;
         }   
     }
     puts("init thread");
@@ -67,11 +107,12 @@ static void playSong(GtkWidget *widget, gpointer user_data ) {
     
     if (flagPlay == 0) {
         flagPlay = 1;
-        puts("play song");
     } else {
         flagPlay = 0;
-        puts("stop song");
+        // puts("stop song");
         al_stop_sample_instance(sampleInstance);
+        playedSound = 0;
+        printf("Stop song. playedSound = %d\n ", playedSound);
     }
 }
 
@@ -156,7 +197,8 @@ static void activate (GtkApplication *app, gpointer user_data) {
     GtkWidget *title, *nameSongOne;
     GtkWidget *buttonSong[20], *buttBoxSong[20];
 
-    for (int i = 0; i < 20; i++) {
+    // Create and shows musics
+    for (int i = 0; i < 12; i++) {
         buttonSong[i] = gtk_button_new_with_label("Rolon de prueba en formato .wav");
         buttBoxSong[i] = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
         gtk_container_add(GTK_CONTAINER(buttBoxSong[i]), buttonSong[i]);
@@ -180,7 +222,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
 // funtion main
 int main (int argc, char **argv) {
     system("clear");
-    system("python3 search.py");
+    searchSounds();
     GtkApplication *app;
     int status;
     pthread_create(&initTimer, NULL, &timer, NULL);
