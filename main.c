@@ -27,18 +27,15 @@ void *timer (void *data) {
         fprintf(stderr, "failed to initialize allegro!\n");
         return NULL;
     }
-
     if (!al_install_audio()){
         fprintf(stderr, "failed to initialize audio!\n");
         return NULL;
     }
-
     if (!al_init_acodec_addon()){
         fprintf(stderr, "failed to initialize audio codecs!\n");
         return NULL;
 
     }
-
     if (!al_reserve_samples(10)){
         fprintf(stderr, "failed to reserve samples!\n");
         return NULL;
@@ -57,16 +54,11 @@ void *timer (void *data) {
                 printf("Audio clip sample not loaded!\n");
                 return NULL;
             }
-
-            
-                al_play_sample_instance(sampleInstance);
+            al_play_sample_instance(sampleInstance);
             
             al_rest(10.0);
-        }
-        
+        }   
     }
-    
-
     puts("init thread");
     initSound();
 }
@@ -188,6 +180,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
 // funtion main
 int main (int argc, char **argv) {
     system("clear");
+    system("python3 search.py");
     GtkApplication *app;
     int status;
     pthread_create(&initTimer, NULL, &timer, NULL);
