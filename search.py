@@ -8,8 +8,10 @@ def main():
     data = open("data.txt", "w")
     
     for sound in sounds:
-        data.write(sound + "\n")
-    
+        if(sound[-4:] == '.wav'):
+            data.write(sound + "\n")
+        else:
+            print(f" no: {sound}")
     data.close()
     
     time.sleep(1)

@@ -30,9 +30,17 @@ int searchSounds() {
     }
 
     int i = 0;
+    int j = 0;
+    char aux;
     while (feof(data) == 0) {
-        fscanf(data, "%s", nameSound[i]);
-        i++;
+        
+        aux = fgetc(data);
+        nameSound[i][j] = aux;
+        j++;
+        if (aux == '\n') {
+            i++;
+            printf("nameSound[i]: %s\n", nameSound[i]);
+        }
     }
 
     // Count number total the sounds

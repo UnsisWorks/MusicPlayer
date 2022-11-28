@@ -1,6 +1,6 @@
 /*
  * Listas.c
- * Por: Dr. Víctor Alberto Gómez Pérez
+ * Por: Dr. Vï¿½ctor Alberto Gï¿½mez Pï¿½rez
  * Universidad de la Sierra Sur
  */
 
