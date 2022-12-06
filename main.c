@@ -1,23 +1,48 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_audio.h>
-#include <allegro5/allegro_acodec.h>
 #include <pthread.h>
+#include <gst/gst.h>
+#include "Listas.c"
 
 #define N 50
 pthread_t initTimer;
+GstElement *pipeline;
 GtkWidget *mainWindow, *initWindow, *box, *initLayout;
-ALLEGRO_SAMPLE_INSTANCE *sampleInstance;
-ALLEGRO_SAMPLE *sample;
-char nameSound[N][30];
-char nameSoundPlayed[30] = "-999";
+char nameSound[N][50];
+char nameSoundPlayed[50] = "-999";
 int totalSounds = 0;;
 int playedSound = 0;
 int soundSelected;
 int endApp = 1;
 int flagPlay = 0;
+
+int playSong(char filname[]) {
+  GstBus *bus;
+  GstMessage *msg;
+  char name[100] = "";
+
+  strcat(name, "playbin uri=file:///home/elietzer/Documentos/unsis/MusicPlayer/sound/");
+  strcat(name, filname);
+  printf("reproducir: %s\n", name);
+
+  /* Crear el pipeline de reproducción */
+  pipeline = gst_parse_launch("playbin uri=file:///home/elietzer/Documentos/unsis/MusicPlayer/sound/Californication.mp3", NULL);
+
+  /* Iniciar la reproducción */
+  gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+  /* Esperar hasta que el archivo haya finalizado la reproducción */
+  bus = gst_element_get_bus(pipeline);
+  msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_EOS | GST_MESSAGE_ERROR);
+
+  /* Limpiar y salir */
+  gst_message_unref(msg);
+  gst_object_unref(bus);
+  gst_element_set_state(pipeline, GST_STATE_NULL);
+  gst_object_unref(pipeline);
+  return 0;
+}
 
 int searchSounds() {
     system("python3 search.py");
@@ -31,104 +56,47 @@ int searchSounds() {
 
     int i = 0;
     int j = 0;
-    char aux;
-    while (feof(data) == 0) {
-        
-        aux = fgetc(data);
-        nameSound[i][j] = aux;
-        j++;
-        if (aux == '\n') {
-            i++;
-            printf("nameSound[i]: %s\n", nameSound[i]);
-        }
+    char aux[50];
+    while (fgets(aux, sizeof(aux), data) != NULL) {
+        strcpy(nameSound[i], aux);
+        // printf("nombre: %s", nameSound[i]);
+        i++;
     }
-
-    // Count number total the sounds
-    for (i = 0; i < N; i++) {
-        if(strcmp(nameSound[i], "") != 0) {
-            printf("datos en memoria: %s\n", nameSound[i]);
-            totalSounds++;
-        } else {
-            printf("total de canciones: %d\n", totalSounds);
-            break;
-        }
-    }
-
+    totalSounds = i - 1;
     fclose(data);
+
+    for (j = 0; j < i; j++)
+    {
+        printf("nombre: %s", nameSound[j]);
+    }
+    
 }
 
-int initSound(){
-
-    return 0;
-}
-// Function for thread
-void *timer (void *data) {
-    printf("%d\n", system("ls sound"));
-    // Funtion for scope global
-
-    if (!al_init()){
-        fprintf(stderr, "failed to initialize allegro!\n");
-        return NULL;
-    }
-    if (!al_install_audio()){
-        fprintf(stderr, "failed to initialize audio!\n");
-        return NULL;
-    }
-    if (!al_init_acodec_addon()){
-        fprintf(stderr, "failed to initialize audio codecs!\n");
-        return NULL;
-
-    }
-    if (!al_reserve_samples(10)){
-        fprintf(stderr, "failed to reserve samples!\n");
-        return NULL;
-    }
-    al_init_acodec_addon();
-
-    while (endApp == 1){
-        if (flagPlay == 1) {
-            // Load song with name = data
-            printf("slected: %s\n", nameSoundPlayed);
-            sample = al_load_sample(nameSoundPlayed); 
-            sampleInstance = al_create_sample_instance(sample);
-            al_set_sample_instance_playmode(sampleInstance, ALLEGRO_PLAYMODE_LOOP);
-            al_attach_sample_instance_to_mixer(sampleInstance, al_get_default_mixer());
-
-            if (!sample){
-                printf("Audio clip sample not loaded!\n");
-                return NULL;
-            }
-            if (playedSound == 0) {
-                al_play_sample_instance(sampleInstance);
-                playedSound = 1;
-                printf("play song. playedSound = %d\n ", playedSound);
-            }
-
-            
-            al_rest(10.0);
-            // flagPlay = 0;
-        }   
-    }
-    puts("init thread");
-    initSound();
-}
-
-static void playSong(GtkWidget *widget, gpointer user_data ) {
-    if (strcmp(nameSoundPlayed, gtk_button_get_label(GTK_BUTTON(widget))) == 0) {
-        puts("mismo boton");
-    }
-    strcpy(nameSoundPlayed, "./sound/");
+int initSound(GtkWidget *widget, gpointer user_data){
+    // char filname[60] = "";
     strcat(nameSoundPlayed, gtk_button_get_label(GTK_BUTTON(widget)));
+    printf("%s\n", nameSoundPlayed);
+    playSong(nameSoundPlayed);
 
-    if (flagPlay == 0) {
+    if(flagPlay == 0){
         flagPlay = 1;
     } else {
         flagPlay = 0;
-        // puts("stop song");
-        al_stop_sample_instance(sampleInstance);
-        playedSound = 0;
-        printf("Stop song. playedSound = %d\n ", playedSound);
     }
+}
+// Function for thread
+void *timer (void *data) {
+
+    while (endApp == 1){
+        if (flagPlay == 1) {
+           playSong(nameSoundPlayed);
+        } else {
+            /* Iniciar la reproducción */
+            gst_element_set_state(pipeline, GST_STATE_PAUSED);
+        }
+    }
+    puts("init thread");
+    // initSound();
 }
 
 /**
@@ -171,7 +139,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
     gtk_window_set_position(GTK_WINDOW(mainWindow), GTK_WIN_POS_CENTER);
     gtk_window_set_title (GTK_WINDOW (mainWindow), "Music");
     gtk_window_set_default_size (GTK_WINDOW (mainWindow), 200, 200);
-    gtk_window_set_opacity(GTK_WINDOW(mainWindow), 0.90);
+    // gtk_window_set_opacity(GTK_WINDOW(mainWindow), 0.90);
     gtk_window_maximize(GTK_WINDOW(mainWindow));
     
 
@@ -218,7 +186,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
         buttBoxSong[i] = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
         gtk_container_add(GTK_CONTAINER(buttBoxSong[i]), buttonSong[i]);
         gtk_widget_set_size_request(GTK_WIDGET(buttonSong[i]), 1070, 50);
-        g_signal_connect(buttonSong[i], "clicked", G_CALLBACK(playSong), NULL);
+        g_signal_connect(buttonSong[i], "clicked", G_CALLBACK(initSound), NULL);
         gtk_style_context_add_class(gtk_widget_get_style_context(buttonSong[i]), "songs");
 
         gtk_container_add(GTK_CONTAINER(musicSection), buttBoxSong[i]);
@@ -236,6 +204,9 @@ static void activate (GtkApplication *app, gpointer user_data) {
 
 // funtion main
 int main (int argc, char **argv) {
+
+    /* Inicializar el marco de trabajo GStreamer */
+    gst_init(&argc, &argv);
     system("clear");
     searchSounds();
     GtkApplication *app;
