@@ -160,13 +160,26 @@ static void activate (GtkApplication *app, gpointer user_data) {
     // COMPONENTS FOR CONTROLS SECTION
     GtkWidget *buttonBefore, *buttonPlay, *buttonAfter;
     GtkWidget *buttBoxBefore, *buttBoxPlay, *buttBoxAfter, *boxForButtons;
+    GtkWidget *imageBefore, *imagePlay, *imageAfter;
 
     // Create buttons and box
     boxForButtons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 25);
 
-    buttonBefore = gtk_button_new_with_label("Ant");
-    buttonPlay = gtk_button_new_with_label("Play");
-    buttonAfter = gtk_button_new_with_label("Sig");
+    buttonBefore = gtk_button_new();
+    buttonPlay = gtk_button_new();
+    buttonAfter = gtk_button_new();
+
+    imageAfter = gtk_image_new_from_file("./images/Siguiente.png");
+    imageBefore = gtk_image_new_from_file("./images/Anterior.png");
+    imagePlay = gtk_image_new_from_file("./images/Play.png");
+
+    gtk_button_set_image(GTK_BUTTON(buttonBefore), imageBefore);
+    gtk_button_set_image(GTK_BUTTON(buttonAfter), imageAfter);
+    gtk_button_set_image(GTK_BUTTON(buttonPlay), imagePlay);
+
+    gtk_style_context_add_class(gtk_widget_get_style_context(buttonAfter), "button-controls");
+    gtk_style_context_add_class(gtk_widget_get_style_context(buttonBefore), "button-controls");
+    gtk_style_context_add_class(gtk_widget_get_style_context(buttonPlay), "button-controls");
 
     buttBoxBefore = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
     buttBoxPlay = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);

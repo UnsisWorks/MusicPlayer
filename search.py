@@ -9,7 +9,7 @@ def main():
     i = 0
     for sound in sounds:
         if(sound[-4:] == '.mp3'):
-            data.write(sound + "\n")
+            data.write(sound + "\n")x
             i += 1
         else:
             print(f" no: {sound}")

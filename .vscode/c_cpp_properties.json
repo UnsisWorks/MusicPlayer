@@ -37,7 +37,8 @@
                 "`pkg-config gtk+-3.0 --cflags`",
                 "`pkg-config --libs gtk+-3.0`",
                 "-lm"
-            ]
+            ],
+            "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
     "version": 4

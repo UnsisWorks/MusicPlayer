@@ -39,6 +39,12 @@
 .songs:hover {
   background: rgb(1, 66, 92);
 }
+.button-controls {
+  background: transparent;
+}
+.button-controls:hover{
+  background: linear-gradient(90deg, transparent, rgb(0, 71, 99), transparent);
+}
 /* 
 .title {
   color: red;
