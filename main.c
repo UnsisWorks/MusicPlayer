@@ -16,18 +16,20 @@ int playedSound = 0;
 int soundSelected;
 int endApp = 1;
 int flagPlay = 0;
+int firtsMov = 0;
+int togglePause = 0;
 
 int playSong(char filname[]) {
   GstBus *bus;
   GstMessage *msg;
-  char name[100] = "";
+  char name[100] = " ";
 
   strcat(name, "playbin uri=file:///home/elietzer/Documentos/unsis/MusicPlayer/sound/");
   strcat(name, filname);
   printf("reproducir: %s\n", name);
 
   /* Crear el pipeline de reproducción */
-  pipeline = gst_parse_launch("playbin uri=file:///home/elietzer/Documentos/unsis/MusicPlayer/sound/Californication.mp3", NULL);
+  pipeline = gst_parse_launch(name, NULL);
 
   /* Iniciar la reproducción */
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
@@ -71,32 +73,44 @@ int searchSounds() {
     }
     
 }
-
-int initSound(GtkWidget *widget, gpointer user_data){
-    // char filname[60] = "";
-    strcat(nameSoundPlayed, gtk_button_get_label(GTK_BUTTON(widget)));
-    printf("%s\n", nameSoundPlayed);
-    playSong(nameSoundPlayed);
-
-    if(flagPlay == 0){
-        flagPlay = 1;
-    } else {
-        flagPlay = 0;
-    }
-}
 // Function for thread
 void *timer (void *data) {
 
+    puts("init thread");
     while (endApp == 1){
         if (flagPlay == 1) {
            playSong(nameSoundPlayed);
-        } else {
-            /* Iniciar la reproducción */
+        } else if (firtsMov == 1){
+            /* Pausa la reproducción */
             gst_element_set_state(pipeline, GST_STATE_PAUSED);
         }
     }
-    puts("init thread");
     // initSound();
+}
+
+int initSound(GtkWidget *widget, gpointer user_data){
+    // char filname[60] = "";
+    pthread_cancel(initTimer);
+    strcpy(nameSoundPlayed, "");
+    strcat(nameSoundPlayed, gtk_button_get_label(GTK_BUTTON(widget)));
+    printf("%s\n", nameSoundPlayed);
+    pthread_create(&initTimer, NULL, &timer, NULL);
+    firtsMov = 1;
+    if(flagPlay == 0){
+        flagPlay = 1;
+    } 
+    //     flagPlay = 0;
+    // }
+}
+
+static void pauseMusic() {
+    if(togglePause == 0 && flagPlay == 1) {
+        gst_element_set_state(pipeline, GST_STATE_PAUSED);
+        togglePause++;
+    } else if (flagPlay == 1){
+        gst_element_set_state(pipeline, GST_STATE_PLAYING);
+        togglePause--;
+    }
 }
 
 /**
@@ -139,7 +153,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
     gtk_window_set_position(GTK_WINDOW(mainWindow), GTK_WIN_POS_CENTER);
     gtk_window_set_title (GTK_WINDOW (mainWindow), "Music");
     gtk_window_set_default_size (GTK_WINDOW (mainWindow), 200, 200);
-    // gtk_window_set_opacity(GTK_WINDOW(mainWindow), 0.90);
+    gtk_window_set_opacity(GTK_WINDOW(mainWindow), 0.89);
     gtk_window_maximize(GTK_WINDOW(mainWindow));
     
 
@@ -161,6 +175,8 @@ static void activate (GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(buttBoxBefore), buttonBefore);
     gtk_container_add(GTK_CONTAINER(buttBoxPlay), buttonPlay);
     gtk_container_add(GTK_CONTAINER(buttBoxAfter), buttonAfter);
+
+    g_signal_connect(buttonPlay, "clicked", pauseMusic, NULL);
 
     gtk_box_pack_start(GTK_BOX(boxForButtons), buttBoxBefore, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(boxForButtons), buttBoxPlay, TRUE, TRUE, 0);
