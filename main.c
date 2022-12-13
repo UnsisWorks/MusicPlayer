@@ -6,7 +6,11 @@
 #include "Listas.c"
 
 #define N 50
+//  Create list for musics
+
+list *sounds;
 pthread_t initTimer;
+
 GstElement *pipeline;
 GtkWidget *mainWindow, *initWindow, *box, *initLayout;
 char nameSound[N][50];
@@ -49,6 +53,11 @@ int playSong(char filname[]) {
 int searchSounds() {
     system("python3 search.py");
 
+    if (is_empty(sounds) == 1) {
+        delete_list(sounds);
+        sounds = init_list();
+    }
+
     FILE *data = fopen("./data.txt", "r");
 
     if (data == NULL) {
@@ -61,9 +70,11 @@ int searchSounds() {
     char aux[50];
     while (fgets(aux, sizeof(aux), data) != NULL) {
         strcpy(nameSound[i], aux);
+        insert(sounds, aux);
         // printf("nombre: %s", nameSound[i]);
         i++;
     }
+    print_list(sounds);
     totalSounds = i - 1;
     fclose(data);
 
@@ -153,7 +164,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
     gtk_window_set_position(GTK_WINDOW(mainWindow), GTK_WIN_POS_CENTER);
     gtk_window_set_title (GTK_WINDOW (mainWindow), "Music");
     gtk_window_set_default_size (GTK_WINDOW (mainWindow), 200, 200);
-    gtk_window_set_opacity(GTK_WINDOW(mainWindow), 0.89);
+    // gtk_window_set_opacity(GTK_WINDOW(mainWindow), 0.89);
     gtk_window_maximize(GTK_WINDOW(mainWindow));
     
 
@@ -237,6 +248,9 @@ int main (int argc, char **argv) {
     /* Inicializar el marco de trabajo GStreamer */
     gst_init(&argc, &argv);
     system("clear");
+    // Innicializar lista
+    sounds = init_list();
+    puts("iniciada");
     searchSounds();
     GtkApplication *app;
     int status;

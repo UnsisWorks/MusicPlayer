@@ -1,26 +1,22 @@
-/*
- * Listas.h
- * Por: Dr. Víctor Alberto Gómez Pérez
- * Universidad de la Sierra Sur
- */
-
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-struct nodo{
-	int info;
-	struct nodo *sig;
-};
+typedef struct node {
+    char data[100];
+    struct node *next;
+    struct node *prev;
+} node;
 
-struct nodo *Crear_Lista ();
-void Insertar_Principio (struct nodo **Lista, int num);
-void Insertar_Final(struct nodo **Lista, int num);
-void Imprimir_Lista(struct nodo *Lista);
-struct nodo *crea_nodo();
-int Eliminar_Principio(struct nodo **Lista);
-int Cuenta_nodo(struct nodo *Lista);
-int Eliminar_Final(struct nodo **Lista);
-int Buscar_Elemento(struct nodo *Lista,int num);
-void Eliminar_Lista(struct nodo **Lista);
-void Eliminar_X(struct nodo **Lista, int x);
-void Insertar_Despues(struct nodo **Lista, int num, int ele);
-void Insertar_Antes(struct nodo **Lista, int num, int ele);
+typedef struct list {
+    node *head;
+} list;
+
+struct node *create_nodo ();
+list *init_list();
+int is_empty(list *l);
+void insert(list *l, char data[]);
+void delete_node(list *l, char data[]);
+int count_nodes(list *l);
+node *search(list *l, char data[]);
+void delete_list(list *l);

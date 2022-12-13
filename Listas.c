@@ -1,208 +1,184 @@
-/*
- * Listas.c
- * Por: Dr. V�ctor Alberto G�mez P�rez
- * Universidad de la Sierra Sur
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "Listas.h"
 
-struct nodo *Crear_Lista(){
-	return NULL;
+struct node *create_nodo (){
+    return ((struct node *)malloc(sizeof(struct node)));
 }
 
-void Insertar_Principio (struct nodo **Lista, int num){
-	struct nodo *p;
-	p=crea_nodo();
-	p->info=num;
-	p->sig=*Lista;
-	*Lista=p;
-}
-
-void Insertar_Final (struct nodo **Lista, int num){
-	struct nodo *p,*aux;
-	if(*Lista==NULL){
-           Insertar_Principio(Lista,num);
-	}
-	else{
-	     aux=*Lista;
-             p=crea_nodo();
-             p->info=num;
-             p->sig=NULL;
-	     for(;aux->sig!=NULL;)
-                 aux=aux->sig;
-             aux->sig=p;
-	    }
-}
-
-int Eliminar_Principio(struct nodo **Lista)
-{
-	int num,e;
-	struct nodo *p;
-	//p=crea_nodo();
-	p=*Lista;
-	num=Cuenta_nodo (*Lista);
-	if (num==0)
-	{
-		printf ("La lista está vacía...\n");
-		return -9999;
-	}
-	else if (num==1)
-			*Lista=NULL;
-		else
-			*Lista=(*Lista)->sig;	
-	e=p->info;
-	free (p);
-	return e;
-}
-
-int Eliminar_Final(struct nodo **Lista) {
-	int cont, ele=0;
-	struct nodo *p, *aux;;
-	cont=Cuenta_nodo(*Lista);
-	aux=*Lista;
-	if(cont == 0)
-               {
-		printf("La lista está vacía...\n");
-                return -9999;
-               }
-	else{
-		if(cont==1){
-			ele = aux->info;
-			*Lista=NULL;
-		}
-		else{
-			for(;aux->sig!=NULL;){
-				p=aux;
-				aux=aux->sig;
-			}
-			ele = aux->info;
-			p -> sig = NULL;
-			//free(aux);
-		}
-	}
-        free(aux);
-	return ele;	
+// Inicializa una nueva lista vacía.
+list *init_list() {
+    list *l = malloc(sizeof(list));
+    l->head = NULL;
+    return l;
 }
 
 
-int Buscar_Elemento(struct nodo *Lista,int num){	
-	struct nodo *aux;
-	int x=0,ban=0;
-	aux=Lista;
-	if(Lista==NULL)
-	   printf("\nLista vacía Buscar_Elemento\n");
-	else{
-	     for( ;aux!=NULL && ban==0; ){
-		 if(aux->info==num)
-		    ban=1;
-		 aux=aux->sig;
-		 x++;
-		}
-	    }
-        if(ban==0)
-		return 0;
-	else
-		return x; 
+void insert(list *l, char data[]) {
+    node *n = malloc(sizeof(node));
+    // n->data = data;
+    strcpy(n->data, data);
+
+    if (l->head == NULL) {
+        // Si la lista está vacía, el nuevo nodo será el único nodo en la lista.
+        // En este caso, el nodo anterior y el siguiente del nuevo nodo serán el mismo nodo.
+        n->prev = n;
+        n->next = n;
+        l->head = n;
+    } else {
+        // Si la lista no está vacía, se inserta el nuevo nodo después del último nodo en la lista.
+        node *last = l->head->prev;
+        n->prev = last;
+        n->next = l->head;
+        last->next = n;
+        l->head->prev = n;
+    }
+}
+
+node *search(list *l, char data[]) {
+    // Si la lista está vacía, no hay nodos que buscar.
+    if (l->head == NULL) {
+        return NULL;
+    }
+
+    // Si hay un solo nodo en la lista, se devuelve el nodo si contiene el dato buscado, o NULL en caso contrario.
+    if ((l->head->prev == l->head) && (l->head->next == l->head)) {
+        if ((strcmp(l->head->data, data)) == 0) {
+            return l->head;
+        } else {
+            return NULL;
+        }
+    }
+    
+    // Si hay más de un nodo en la lista, se busca el nodo recorriendo la lista en ambos sentidos.
+    node *n = l -> head;
+    while (n != l->head->next) {
+        // printf("info sea: %d\n", n->data);
+        if (strcmp(n->data, data) == 0) {
+            return n;
+        }
+        n = n->next;
+    }
+    n = l->head->prev;
+    while (n != l->head) {
+        if (strcmp(n->data, data) == 0) {
+            return n;
+        }
+        n = n->prev;
+    }
+
+    // Si no se encuentra el nodo, se devuelve NULL.
+    return NULL;
+}
+
+void delete_node(list *l, char data[]) {
+    node *n = search(l, data);
+    // printf("info: %d\n", n->data);
+
+    // Si la lista está vacía, no se puede eliminar ningún nodo.
+    if (l->head == NULL) {
+        return;
+    }
+
+    // Si hay un solo nodo en la lista, simplemente se establece el puntero head de la lista en NULL.
+    if (l->head->prev == l->head && l->head->next == l->head) {
+        free(l->head);
+        l->head = NULL;
+        return;
+    }
+
+    // Si hay más de un nodo en la lista, se ajustan los punteros prev y next de los nodos vecinos del nodo a eliminar.
+    node *prev = n->prev;
+    node *next = n->next;
+    prev->next = next;
+    next->prev = prev;
+
+    // Si el nodo a eliminar es el primer nodo en la lista, se actualiza el puntero head de la lista.
+    if (n == l->head) {
+        l->head = next;
+    }
+
+    // Finalmente, se libera la memoria asignada al nodo eliminado.
+    free(n);
+}
+
+int count_nodes(list *l) {
+    // Si la lista está vacía, no hay nodos que contar.
+    if (l->head == NULL) {
+        return 0;
+    }
+
+    // Si hay un solo nodo en la lista, se devuelve 1.
+    if (l->head->prev == l->head && l->head->next == l->head) {
+        return 1;
+    }
+
+    // Si hay más de un nodo en la lista, se cuentan los nodos recorriendo la lista en ambos sentidos.
+    int count = 1;
+    node *n = l->head->next;
+    while (n != l->head) {
+        count++;
+        n = n->next;
+    }
+    // n = l->head->prev;
+    // while (n != l->head) {
+    //     count++;
+    //     n = n->prev;
+    // }
+    return count;
 }
 
 
-void Eliminar_Lista(struct nodo **Lista){
-	int i,cont;
-	struct nodo *aux;
-	aux=*Lista;
-	cont=Cuenta_nodo(aux);
-	for(i=0;i<cont;i++)
-	    Eliminar_Final(Lista);
-	//~printf("\nLista eliminada Eliminar_Lista\n");
+void delete_list(list *l) {
+    // Si la lista está vacía, no hay nodos que eliminar.
+    if (l->head == NULL) {
+        return;
+    }
+
+    // Si hay un solo nodo en la lista, se elimina el nodo y se libera la memoria asignada para la lista.
+    if (l->head->prev == l->head && l->head->next == l->head) {
+        free(l->head);
+        free(l);
+        return;
+    }
+
+    // Si hay más de un nodo en la lista, se eliminan todos los nodos recorriendo la lista en ambos sentidos.
+    node *n = l->head->next;
+    while (n != l->head) {
+        node *tmp = n;
+        n = n->next;
+        free(tmp);
+    }
+    n = l->head->prev;
+    // while (n != l->head) {
+    //     node *tmp = n;
+    //     n = n->prev;
+    //     free(tmp);
+    // }
+
+    // Se elimina el primer nodo y se libera la memoria asignada para la lista.
+    free(l->head);
+    free(l);
+}
+/* Imprime los elementos de la lista doblemente enlazada circular. */
+void print_list(list *list) {
+  node *current = list->head;
+
+  /* Recorre la lista hasta volver al elemento inicial. */
+  do {
+    printf("%s -> ", current->data);
+    current = current->next;
+  } while (current != list->head);
+  puts("NULL");
 }
 
-struct nodo *crea_nodo(){
-	return ((struct nodo *)malloc(sizeof(struct nodo)));
-}
 
-void Imprimir_Lista(struct nodo *Lista){
-	for(;Lista!=NULL;Lista=Lista->sig)
-		printf("%d->",Lista->info);
-	printf("NULL");
-	printf("\n");
-}
-
-int Cuenta_nodo(struct nodo *Lista){
-	int i=0;
-	for( ;Lista!=NULL; Lista=Lista->sig)
-		i++;
-	return i;
-}
-
-void Insertar_Antes(struct nodo **Lista, int num, int ele){
-	struct nodo *Q, *X, *T;
-	int band=1;
-	Q=*Lista;
-	while(Q->info != ele && band == 1){
-		if(Q->sig!=NULL){
-			T = Q;
-			Q = Q->sig;
-		}
-		else
-			band = 0;
-	}
-	if(band==1){
-		X=crea_nodo();
-		X->info=num;
-		if(*Lista == Q)
-			Insertar_Principio(Lista, num);
-		else{
-			T->sig=X;
-			X->sig =Q;
-		}
-	}
-	else
-		printf("El nodo %d dado como referencia no se encuentra en la lista.\n",ele);
-}
-
-void Insertar_Despues(struct nodo **Lista, int num, int ele){
-	struct nodo *Q, *T;
-	int band =1;
-	Q=*Lista;
-	while(Q->info!=ele && band==1){
-		if(Q->sig!=NULL)
-			Q=Q->sig;
-		else
-			band = 0;
-	}
-	if(band==1){
-		T=crea_nodo();
-		T->info=num;
-		T->sig=Q->sig;
-		Q->sig=T;
-	}
-	else
-		printf("El nodo %d dado como referencia no se encuentra en la lista.\n",ele);
-}
-
-void Eliminar_X(struct nodo **Lista, int x){
-	struct nodo *Q, *T;
-	int band = 1;
-	Q=*Lista;
-	while(Q->info!=x && band == 1){
-		if(Q->sig!=NULL){
-			T=Q;
-			Q=Q->sig;
-		}
-		else
-			band = 0;
-	}
-	if(band==0){
-		printf("El nodo con informacion %d no se encuentra en la lista.\n",x);
-	}
-	else{
-		if(*Lista == Q)
-			*Lista=Q->sig;
-		else
-			T->sig=Q->sig;
-                free(Q);
-	}
-	
+int is_empty(list *l) {
+    if (l -> head == NULL) {
+      // la lista está vacía
+      return 0;
+    } else {
+    // la lista no está vacía
+    return 1;
+    }
 }

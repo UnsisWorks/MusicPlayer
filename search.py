@@ -9,13 +9,11 @@ def main():
     i = 0
     for sound in sounds:
         if(sound[-4:] == '.mp3'):
-            data.write(sound + "\n")x
+            data.write(sound + "\n")
             i += 1
         else:
             print(f" no: {sound}")
     data.close()
-    # print(sounds)
-    # time.sleep(1)
     
 if __name__ == '__main__':
     main()
