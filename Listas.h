@@ -18,5 +18,5 @@ int is_empty(list *l);
 void insert(list *l, char data[]);
 void delete_node(list *l, char data[]);
 int count_nodes(list *l);
-node *search(list *l, char data[]);
+node *search (list *l, char data[]);
 void delete_list(list *l);

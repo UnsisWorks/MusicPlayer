@@ -15,7 +15,7 @@ GstElement *pipeline;
 GtkWidget *mainWindow, *initWindow, *box, *initLayout;
 char nameSound[N][50];
 char nameSoundPlayed[50] = "-999";
-int totalSounds = 0;;
+// int totalSounds = 0;
 int playedSound = 0;
 int soundSelected;
 int endApp = 1;
@@ -75,14 +75,8 @@ int searchSounds() {
         i++;
     }
     print_list(sounds);
-    totalSounds = i - 1;
+    // totalSounds = i - 1;
     fclose(data);
-
-    for (j = 0; j < i; j++)
-    {
-        printf("nombre: %s", nameSound[j]);
-    }
-    
 }
 // Function for thread
 void *timer (void *data) {
@@ -221,7 +215,7 @@ static void activate (GtkApplication *app, gpointer user_data) {
     GtkWidget *buttonSong[20], *buttBoxSong[20];
 
     // Create and shows musics
-    for (int i = 0; i < totalSounds; i++) {
+    for (int i = 0; i < count_nodes(sounds); i++) {
         buttonSong[i] = gtk_button_new_with_label(nameSound[i]);
         buttBoxSong[i] = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
         gtk_container_add(GTK_CONTAINER(buttBoxSong[i]), buttonSong[i]);
