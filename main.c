@@ -99,6 +99,7 @@ int initSound(GtkWidget *widget, gpointer user_data){
     strcpy(nameSoundPlayed, "");
     strcat(nameSoundPlayed, gtk_button_get_label(GTK_BUTTON(widget)));
     printf("%s\n", nameSoundPlayed);
+    struct node *aux = search(sounds, nameSoundPlayed);
     pthread_create(&initTimer, NULL, &timer, NULL);
     firtsMov = 1;
     if(flagPlay == 0){
@@ -111,11 +112,37 @@ int initSound(GtkWidget *widget, gpointer user_data){
 static void pauseMusic() {
     if(togglePause == 0 && flagPlay == 1) {
         gst_element_set_state(pipeline, GST_STATE_PAUSED);
+
+    // pthread_cancel(initTimer);
         togglePause++;
     } else if (flagPlay == 1){
         gst_element_set_state(pipeline, GST_STATE_PLAYING);
         togglePause--;
     }
+}
+
+void after () {
+    // pauseMusic();
+    pthread_cancel(initTimer);
+    struct node *aux = search(sounds, nameSoundPlayed);
+    // playSong(aux->next);
+    strcpy(nameSoundPlayed, aux->next->data);
+    flagPlay = 1;
+
+    pthread_create(&initTimer, NULL, &timer, NULL);
+    // sleep(1);
+    flagPlay = 0;
+}
+void before () {
+    // pauseMusic();
+    pthread_cancel(initTimer);
+    struct node *aux = search(sounds, nameSoundPlayed);
+    strcpy(nameSoundPlayed, aux->prev->data);
+    flagPlay = 1;
+    pthread_create(&initTimer, NULL, &timer, NULL);
+    // sleep(1);
+    flagPlay = 0;
+    // if (gst_element_get_state(pipeline, GST_STATE_PLAYING, ))
 }
 
 /**
@@ -195,6 +222,8 @@ static void activate (GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(buttBoxAfter), buttonAfter);
 
     g_signal_connect(buttonPlay, "clicked", pauseMusic, NULL);
+    g_signal_connect(buttonAfter, "clicked", after, NULL);
+    g_signal_connect(buttonBefore, "clicked", before, NULL);
 
     gtk_box_pack_start(GTK_BOX(boxForButtons), buttBoxBefore, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(boxForButtons), buttBoxPlay, TRUE, TRUE, 0);
